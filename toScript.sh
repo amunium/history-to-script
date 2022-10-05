@@ -1,7 +1,13 @@
 #!/bin/bash
 
 # add trap to temp1 and temp0 files
+trap finish EXIT
 
+function finish {
+	rm -rf "temp0.txt"
+	rm -rf "temp1.txt"
+	kill 0
+}
 
 answer="a"
 while [ $answer != "y" ]
@@ -26,7 +32,7 @@ do
     sed -E 's/\s[0-9]+\s\s//' temp0.txt > temp1.txt
     
 
-    cat "./temp1.txt"
+    cat  "./temp1.txt"
     echo "Is this the correct script? (y/n) "
     echo -n ">>> "
     read answer
@@ -62,7 +68,7 @@ do
                 read rmFirst
             done
         fi
-        echo "Finished? (y/n)"
+        echo "Do you want to save as file? (y/n)"
         echo -n ">>> "
         read answer
         if [ $answer != "y" ]
