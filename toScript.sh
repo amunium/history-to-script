@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# add trap to temp1 and temp0 files
+
 number=$1
 answer=""
 while [ answer != "y" ]
@@ -19,11 +21,12 @@ do
         done
     fi
 
-    history $number > temp.txt
-    historyClean=$(sed $d temp.txt)
-    output=$(echo $historyDump | sed -E /[0-9]{4}/d)
+    # clean input - Not the most beautiful solution
+    history $number+1 > temp0.txt
+    sed '$d' temp0.txt > temp1.txt
+    sed -E '/^\s[0-9]{4}\s{2}/d' temp1.txt > temp0.txt
 
-    echo $output
+    cat temp.txt
     echo "Is this the correct script? (y/n) "
     echo -n ">>> "
     read answer
