@@ -2,6 +2,7 @@
 
 # add trap to temp1 and temp0 files
 
+
 number=$1
 answer=""
 while [ answer != "y" ]
@@ -21,22 +22,45 @@ do
         done
     fi
 
-    # clean input - Not the most beautiful solution
-    history $number+1 > temp0.txt
-    sed '$d' temp0.txt > temp1.txt
-    sed -E '/^\s[0-9]{4}\s{2}/d' temp1.txt > temp0.txt
+    # clean history
+    number=$(($number+1)) # This makes up for the command starting this script 
+    history $number > temp0.txt
+    sed -i '$d' temp0.txt # removes this script from history
+    sed -E 's/^\s[0-9]{4}\s{2}//' temp0.txt > temp1.txt # clean
+    
+    cat temp1.txt
 
-    cat temp.txt
     echo "Is this the correct script? (y/n) "
     echo -n ">>> "
     read answer
-    if [ answer != "y" ]
+    if [ $answer != "y" ]
     then
-        number="a"
+        echo
+        echo "Looking for corrective actions..."
+        sleep 1
+        echo "Remove the last line? (y/n)"
+        echo -n ">>> "
+        read rmLine
+        while [ $rmLine = "y" ]
+        do
+            echo "Removing last line:"
+            sed -i '$d' temp1.txt
+            cat temp1.txt
+            echo "Remove another?"
+            echo -n ">>> "
+            read rmLine
+        done
+        echo "Do you want to restart?"
+        echo -n ">>> "
+        read goBack
+        if [ $goBack = "y" ]
+        then
+            number="a"
+        fi
     fi
 done
 
-echo "what do you want to name the script? "
+echo "What do you want to name the script? "
 echo -n ">>> "
 read scriptName
 if [ echo $scriptName | grep -qoE ".sh$" ]
@@ -45,3 +69,5 @@ then
 else
     echo $output > $scriptName.sh
 fi
+
+echo "History has been canned."
