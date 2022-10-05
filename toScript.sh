@@ -3,42 +3,35 @@
 # add trap to temp1 and temp0 files
 
 
-number="a"
-answer=""
-while [ answer != "y" ]
+answer="a"
+while [ $answer != "y" ]
 do
-#    if (echo $number | grep -qoE "^[0-9]+$")
-#    then
-#        echo "Looking $number commands into history..."
-#    else
-        while (echo $number | grep -qE "[^0-9]+")
-        do
-            echo -n "Please enter how far back you want to go: "
-            read number
-            if (echo $number | grep -qE "[^0-9]+")
-            then
-                echo "$number is not an accepted number."
-            fi
-        done
-#    fi
+    number="a"
+    while (echo $number | grep -qE "[^0-9]+")
+    do
+        echo -n "Please enter how far back you want to go: "
+        read number
+        if (echo $number | grep -qE "[^0-9]+")
+        then
+            echo "$number is not an accepted number."
+        fi
+    done
 
-    # clean history
-    number=$(($number+1)) # This makes up for the command starting this script 
+    # enable bash history
+    HISTFILE=~/.bash_history
+    set -o history
     history $number > temp0.txt
-    sed -i '$d' temp0.txt # removes this script from history
-    sed -E 's/^\s[0-9]{4}\s{2}//' temp0.txt > temp1.txt # clean
     
-    sleep 1
-    cat "temp1.txt"
-    cat "temp0.txt"
-    sleep 1
+    # clean history
+    sed -E 's/\s[0-9]+\s\s//' temp0.txt > temp1.txt
+    
 
+    cat "./temp1.txt"
     echo "Is this the correct script? (y/n) "
     echo -n ">>> "
     read answer
     if [ $answer != "y" ]
     then
-        echo
         echo "Take corrective actions? (y/n)"
         echo -n ">>> "
         read corrective
@@ -68,7 +61,12 @@ do
                 echo -n ">>> "
                 read rmFirst
             done
-        else
+        fi
+        echo "Finished? (y/n)"
+        echo -n ">>> "
+        read answer
+        if [ $answer != "y" ]
+        then
             echo "Do you want to restart? (y/n)"
             echo -n ">>> "
             read goBack
@@ -76,7 +74,6 @@ do
             then
                 kill 0 # exit point
             fi
-            answer="a"
         fi
     fi
 done
@@ -86,9 +83,9 @@ echo -n ">>> "
 read scriptName
 if ( echo $scriptName | grep -qoE ".sh$" )
 then
-    echo $output > $scriptName
+    cat temp1.txt > $scriptName
 else
-    echo $output > $scriptName.sh
+    cat temp1.txt > $scriptName.sh
 fi
 
 echo "History has been canned."
