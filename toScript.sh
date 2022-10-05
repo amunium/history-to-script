@@ -3,24 +3,24 @@
 # add trap to temp1 and temp0 files
 
 
-number=$1
+number="a"
 answer=""
 while [ answer != "y" ]
 do
-    if (echo $number | grep -qoE "^[0-9]*$")
-    then
-        echo "Looking $number commands into history..."
-    else
-        while (echo $number | grep -qoE "[a-zA-Z]")
+#    if (echo $number | grep -qoE "^[0-9]+$")
+#    then
+#        echo "Looking $number commands into history..."
+#    else
+        while (echo $number | grep -qE "[^0-9]+")
         do
             echo -n "Please enter how far back you want to go: "
             read number
-            if [echo $number | grep -qoE "[a-zA-Z]"]
+            if (echo $number | grep -qE "[^0-9]+")
             then
                 echo "$number is not an accepted number."
             fi
         done
-    fi
+#    fi
 
     # clean history
     number=$(($number+1)) # This makes up for the command starting this script 
@@ -28,7 +28,10 @@ do
     sed -i '$d' temp0.txt # removes this script from history
     sed -E 's/^\s[0-9]{4}\s{2}//' temp0.txt > temp1.txt # clean
     
-    cat temp1.txt
+    sleep 1
+    cat "temp1.txt"
+    cat "temp0.txt"
+    sleep 1
 
     echo "Is this the correct script? (y/n) "
     echo -n ">>> "
@@ -36,26 +39,44 @@ do
     if [ $answer != "y" ]
     then
         echo
-        echo "Looking for corrective actions..."
-        sleep 1
-        echo "Remove the last line? (y/n)"
+        echo "Take corrective actions? (y/n)"
         echo -n ">>> "
-        read rmLine
-        while [ $rmLine = "y" ]
-        do
-            echo "Removing last line:"
-            sed -i '$d' temp1.txt
-            cat temp1.txt
-            echo "Remove another?"
-            echo -n ">>> "
-            read rmLine
-        done
-        echo "Do you want to restart?"
-        echo -n ">>> "
-        read goBack
-        if [ $goBack = "y" ]
+        read corrective
+        if [ $corrective = "y" ]
         then
-            number="a"
+            echo "Remove the last line? (y/n)"
+            echo -n ">>> "
+            read rmLast
+            while [ $rmLast = "y" ]
+            do
+                echo "Removing last line:"
+                sed -i '$d' temp1.txt
+                cat temp1.txt
+                echo "Remove another?"
+                echo -n ">>> "
+                read rmLast
+            done
+            echo "Remove the first line? (y/n)"
+            echo -n ">>> "
+            read rmFirst
+            while [ $rmFirst = "y" ]
+            do
+                echo "Removing first line:"
+                sed -i '1d' temp1.txt
+                cat temp1.txt
+                echo "Remove another?"
+                echo -n ">>> "
+                read rmFirst
+            done
+        else
+            echo "Do you want to restart? (y/n)"
+            echo -n ">>> "
+            read goBack
+            if [ $goBack != "y" ]
+            then
+                kill 0 # exit point
+            fi
+            answer="a"
         fi
     fi
 done
@@ -63,7 +84,7 @@ done
 echo "What do you want to name the script? "
 echo -n ">>> "
 read scriptName
-if [ echo $scriptName | grep -qoE ".sh$" ]
+if ( echo $scriptName | grep -qoE ".sh$" )
 then
     echo $output > $scriptName
 else
